@@ -68,12 +68,14 @@ def get_drinks():
 @app.route('/drinks-detail', methods=['GET'])
 @requires_auth('get:drinks-detail')
 def get_drinks_details(jwt):
-    drinks = Drink.query.all()
-    drinks_formated = [drink.long() for drink in drinks]
-    return jsonify({
-        'success': True,
-        'drinks': drinks_formated
-    })
+    try:
+        drinks = Drink.query.order_by(Drink.id).all()
+        result = [drink.long() for drink in drinks]
+        if len(result) == 0:
+            abort(404)  # Not found - when there are no drink
+        return jsonify({'success': True, 'drinks': result})
+    except AuthError:
+        abort(422)
 
 
 '''
